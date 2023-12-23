@@ -30,23 +30,23 @@ def pyramid_structure(optical_flow_func: Callable,
             raise ValueError("Podana funkcja nie jest wywoływalna.")
 
         if isinstance(input_data, str):
-            cap = cv2.VideoCapture(input_data)
-            frames = []
+            cap: cv2.VideoCapture = cv2.VideoCapture(input_data)
+            frames: List[np.ndarray] = []
+            ret: bool
+            frame: np.ndarray
             ret, frame = cap.read()
             while ret:
                 frames.append(frame)
                 ret, frame = cap.read()
             cap.release()
-
         elif isinstance(input_data, list) and all(isinstance(frame, np.ndarray) for frame in input_data):
             frames = input_data
-
         else:
-            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy klatek.")
+            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
 
-        pyramid = create_pyramid(frames)
+        pyramid: List[List[np.ndarray]] = create_pyramid(frames)
 
-        flow_pyramid = []
+        flow_pyramid: List[np.ndarray] = []
         for level in pyramid:
             flow = optical_flow_func(level, params, debug)
             flow_pyramid.append(flow)
@@ -73,8 +73,8 @@ def create_pyramid(frames: List[np.ndarray], levels: int = 3) -> List[List[np.nd
         · List[List[np.ndarray]]
             - Piramida klatek optycznych.
     """
-    pyramid = [frames]
+    pyramid: List[List[np.ndarray]] = [frames]
     for _ in range(levels - 1):
-        reduced_frames = [cv2.pyrDown(frame) for frame in pyramid[-1]]
+        reduced_frames: List = [cv2.pyrDown(frame) for frame in pyramid[-1]]
         pyramid.append(reduced_frames)
     return pyramid
