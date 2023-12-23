@@ -36,56 +36,62 @@ def func(input_data: Union[str, List[np.ndarray]],
             "blockSize": 7
         }
 
-    if isinstance(input_data, str):
-        cap: cv2.VideoCapture = cv2.VideoCapture(input_data)
-        frames: List[np.ndarray] = []
-        ret: bool
-        frame: np.ndarray
-        ret, frame = cap.read()
-        while ret:
-            frames.append(frame)
+    try:
+        if isinstance(input_data, str):
+            cap: cv2.VideoCapture = cv2.VideoCapture(input_data)
+            frames: List[np.ndarray] = []
+            ret: bool
+            frame: np.ndarray
             ret, frame = cap.read()
-        cap.release()
-    elif isinstance(input_data, list) and all(isinstance(frame, np.ndarray) for frame in input_data):
-        frames = input_data
-    else:
-        raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
+            while ret:
+                frames.append(frame)
+                ret, frame = cap.read()
+            cap.release()
+        elif isinstance(input_data, list) and all(isinstance(frame, np.ndarray) for frame in input_data):
+            frames = input_data
+        else:
+            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
 
-    gray_frames: List[np.ndarray] = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames]
+        gray_frames: List[np.ndarray] = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames]
 
-    prev_pts: np.ndarray = cv2.goodFeaturesToTrack(gray_frames[0], mask=None, **params)
+        prev_pts: np.ndarray = cv2.goodFeaturesToTrack(gray_frames[0], mask=None, **params)
 
-    flow_frames: List[np.ndarray] = []
-    for i in range(1, len(gray_frames)):
-        next_pts, status, err = cv2.calcOpticalFlowPyrLK(gray_frames[i - 1], gray_frames[i], prev_pts, None)
+        flow_frames: List[np.ndarray] = []
+        for i in range(1, len(gray_frames)):
+            next_pts, status, err = cv2.calcOpticalFlowPyrLK(gray_frames[i - 1], gray_frames[i], prev_pts, None)
 
-        good_old: np.ndarray = prev_pts[status == 1]
-        good_new: np.ndarray = next_pts[status == 1]
+            good_old: np.ndarray = prev_pts[status == 1]
+            good_new: np.ndarray = next_pts[status == 1]
 
-        flow: np.ndarray = np.zeros_like(frames[i])
-        for j, (new, old) in enumerate(zip(good_new, good_old)):
-            a, b = new.ravel()
-            c, d = old.ravel()
-            cv2.line(flow, (a, b), (c, d), (0, 255, 0), 2)
-            cv2.circle(frames[i], (a, b), 5, (0, 255, 0), -1)
+            flow: np.ndarray = np.zeros_like(frames[i])
+            for j, (new, old) in enumerate(zip(good_new, good_old)):
+                a, b = new.ravel()
+                c, d = old.ravel()
+                cv2.line(flow, (a, b), (c, d), (0, 255, 0), 2)
+                cv2.circle(frames[i], (a, b), 5, (0, 255, 0), -1)
 
-        flow_frames.append(flow)
-        prev_pts = np.reshape(good_new, (-1, 1, 2))
+            flow_frames.append(flow)
+            prev_pts = np.reshape(good_new, (-1, 1, 2))
 
-    if debug:
-        h, w, _ = frames[0].shape
-        debug_video: np.ndarray = np.zeros((h, w * 2, 3), dtype=np.uint8)
+        if debug:
+            h, w, _ = frames[0].shape
+            debug_video: np.ndarray = np.zeros((h, w * 2, 3), dtype=np.uint8)
 
-        for i in range(len(frames)):
-            debug_video[:, :w, :] = frames[i]
-            debug_video[:, w:, :] = flow_frames[i]
+            for i in range(len(frames)):
+                debug_video[:, :w, :] = frames[i]
+                debug_video[:, w:, :] = flow_frames[i]
 
-            cv2.imshow('Debug Video', debug_video)
-            if cv2.waitKey(30) & 0xFF == 27:  # ESC key to exit
-                break
+                cv2.imshow('Debug Video', debug_video)
+                if cv2.waitKey(30) & 0xFF == 27:  # ESC key to exit
+                    break
 
-        cv2.destroyAllWindows()
+            cv2.destroyAllWindows()
 
-        return debug_video
-    else:
-        return np.array(flow_frames)
+            return debug_video
+        else:
+            return np.array(flow_frames)
+
+    except cv2.error as e:
+        raise ValueError(f"Błąd OpenCV: {e}")
+    except Exception as e:
+        raise ValueError(f"Niespodziewany błąd: {e}")
