@@ -28,22 +28,22 @@ def func(optical_flow_func: Callable, input_data: Union[str, List[np.ndarray]],
             raise ValueError("Podana funkcja nie jest wywoływalna.")
 
         if isinstance(input_data, str):
-            cap = cv2.VideoCapture(input_data)
-            frames = []
+            cap: cv2.VideoCapture = cv2.VideoCapture(input_data)
+            frames: List[np.ndarray] = []
+            ret: bool
+            frame: np.ndarray
             ret, frame = cap.read()
             while ret:
                 frames.append(frame)
                 ret, frame = cap.read()
             cap.release()
-
         elif isinstance(input_data, list) and all(isinstance(frame, np.ndarray) for frame in input_data):
             frames = input_data
-
         else:
-            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy klatek.")
+            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
 
-        forward_flow = optical_flow_func(frames, params, debug)
-        backward_flow = optical_flow_func(frames[::-1], params, debug)[::-1]
+        forward_flow: Union[np.ndarray, List[np.ndarray]] = optical_flow_func(frames, params, debug)
+        backward_flow: Union[np.ndarray, List[np.ndarray]] = optical_flow_func(frames[::-1], params, debug)[::-1]
 
         return [forward_flow, backward_flow]
 
