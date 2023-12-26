@@ -65,8 +65,8 @@ def func(input_data: Union[str, List[np.ndarray]],
 
             flow: np.ndarray = np.zeros_like(frames[i])
             for j, (new, old) in enumerate(zip(good_new, good_old)):
-                a, b = new.ravel()
-                c, d = old.ravel()
+                a, b = map(int, new.ravel())
+                c, d = map(int, old.ravel())
                 cv2.line(flow, (a, b), (c, d), (0, 255, 0), 2)
                 cv2.circle(frames[i], (a, b), 5, (0, 255, 0), -1)
 
@@ -78,8 +78,8 @@ def func(input_data: Union[str, List[np.ndarray]],
             debug_video: np.ndarray = np.zeros((h, w * 2, 3), dtype=np.uint8)
 
             for i in range(len(frames)):
-                debug_video[:, :w, :] = frames[i]
-                debug_video[:, w:, :] = flow_frames[i]
+                debug_video[:, :w, :] = flow_frames[i]
+                debug_video[:, w:, :] = frames[i]
 
                 cv2.imshow('Debug Video', debug_video)
                 if cv2.waitKey(30) & 0xFF == 27:  # ESC key to exit
@@ -89,9 +89,12 @@ def func(input_data: Union[str, List[np.ndarray]],
 
             return debug_video
         else:
-            return np.array(flow_frames)
+            return np.array(frames)
 
     except cv2.error as e:
         raise ValueError(f"Błąd OpenCV: {e}")
     except Exception as e:
         raise ValueError(f"Niespodziewany błąd: {e}")
+
+if __name__ == "__main__":
+    func("/home/rskay/PycharmProjects/widzenie-komputerowe/slow_traffic_small.mp4", debug=True)

@@ -2,11 +2,10 @@ import numpy as np
 import cv2
 from typing import Callable, Optional, Union, List, Dict
 
-
-def pyramid_structure(optical_flow_func: Callable,
+def func(optical_flow_func: Callable,
                       input_data: Union[str, List[np.ndarray]],
                       params: Optional[Dict[str, float]] = None,
-                      debug: bool = False) -> Union[np.ndarray, List[np.ndarray]]:
+                      debug: bool = False, levels: int = 3) -> Union[np.ndarray, List[np.ndarray]]:
     """
     Funkcja wykonuje piramidowy przepływ optyczny na podstawie podanej funkcji przepływu optycznego.
 
@@ -20,6 +19,8 @@ def pyramid_structure(optical_flow_func: Callable,
             - Parametry przekazywane do funkcji przepływu optycznego.
         · debug: bool = False
             - Określa, czy włączyć tryb debugowania.
+        · levels: int = 3
+            - Określa ilośc poziomów piramidy.
 
     Zwraca:
         · Union[np.ndarray, List[np.ndarray]]
@@ -44,7 +45,7 @@ def pyramid_structure(optical_flow_func: Callable,
         else:
             raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
 
-        pyramid: List[List[np.ndarray]] = create_pyramid(frames)
+        pyramid: List[List[np.ndarray]] = create_pyramid(frames, levels=levels)
 
         flow_pyramid: List[np.ndarray] = []
         for level in pyramid:
@@ -59,7 +60,7 @@ def pyramid_structure(optical_flow_func: Callable,
         raise ValueError(f"Niespodziewany błąd: {e}")
 
 
-def create_pyramid(frames: List[np.ndarray], levels: int = 3) -> List[List[np.ndarray]]:
+def create_pyramid(frames: List[np.ndarray], levels: int) -> List[List[np.ndarray]]:
     """
     Funkcja tworzy piramidę klatek optycznych.
 

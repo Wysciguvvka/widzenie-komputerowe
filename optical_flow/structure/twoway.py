@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 from typing import Callable, Optional, Union, List, Dict
 
-
 def func(optical_flow_func: Callable, input_data: Union[str, List[np.ndarray]],
          params: Optional[Dict[str, float]] = None, debug: bool = False) -> List[np.ndarray]:
     """
@@ -51,3 +50,4 @@ def func(optical_flow_func: Callable, input_data: Union[str, List[np.ndarray]],
         raise ValueError(f"Błąd podczas obliczeń przepływu optycznego: {str(e)}")
     except Exception as e:
         raise ValueError(f"Niespodziewany błąd: {e}")
+
