@@ -10,6 +10,7 @@ import optical_flow.structure as structure
 import optical_flow.models as models
 import frame_interpolation as interpolation
 
+
 def process_video(input_data: Union[str, List[np.ndarray]],
                   optical_flow_func: Callable,
                   structure_func: Callable,
@@ -59,7 +60,8 @@ def process_video(input_data: Union[str, List[np.ndarray]],
         frames_copy = [frame.copy() for frame in frames]
         if is_parameter_present(structure_func, "levels"):
             optical_flow_frames: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
-                                                                                      flow_params, levels=pyramid_levels)
+                                                                                      flow_params,
+                                                                                      levels=pyramid_levels)
         else:
             optical_flow_frames: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
                                                                                       flow_params)
@@ -96,6 +98,7 @@ def process_video(input_data: Union[str, List[np.ndarray]],
 def is_parameter_present(function: Callable, parameter_name: str) -> bool:
     parameters = inspect.signature(function).parameters
     return parameter_name in parameters
+
 
 if __name__ == "__main__":
     process_video("slow_traffic_small.mp4",
