@@ -1,15 +1,38 @@
-import cv2
 import numpy as np
+import cv2
 
 
-def func(prev_frame, next_frame, optical_flow, alpha=0.8):
-    h, w = next_frame.shape[:2]
-    scaled_optical_flow = alpha * optical_flow
-    y, x = np.mgrid[0:h, 0:w]
-    flow_map = np.column_stack((x.flatten(), y.flatten())) + scaled_optical_flow.reshape(-1, 2)
-    flow_map[:, 0] = np.clip(flow_map[:, 0], 0, w - 1)
-    flow_map[:, 1] = np.clip(flow_map[:, 1], 0, h - 1)
-    flow_map = flow_map.reshape(h, w, 2).astype(np.float32)
-    interpolated_frame = cv2.remap(prev_frame, flow_map[:, :, 0], flow_map[:, :, 1], interpolation=cv2.INTER_LINEAR)
+def calculate_gradients(image):
+    grad_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)  # noqa
+    grad_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)  # noqa
+    return grad_x, grad_y
+
+
+def func(prev_frame, next_frame, optical_flow):
+    t = 0.5
+    height, width, channels = prev_frame.shape
+    flow_x, flow_y = optical_flow[:, :, 0], optical_flow[:, :, 1]
+    x_grid, y_grid = np.meshgrid(np.arange(width), np.arange(height))
+
+    interp_x1 = x_grid - t * flow_x
+    interp_y1 = y_grid - t * flow_y
+    xt1 = np.maximum(np.minimum(interp_x1, width - 1), 0).astype(int)
+    yt1 = np.maximum(np.minimum(interp_y1, height - 1), 0).astype(int)
+
+    interp_x2 = x_grid + (1 - t) * flow_x
+    interp_y2 = y_grid + (1 - t) * flow_y
+    xt2 = np.maximum(np.minimum(interp_x2, width - 1), 0).astype(int)
+    yt2 = np.maximum(np.minimum(interp_y2, height - 1), 0).astype(int)
+
+    interpolated_frame = np.zeros_like(prev_frame, dtype=np.float32)
+
+    for c in range(channels):
+        interpolated_frame[..., c] = (
+                t * cv2.remap(prev_frame[..., c], xt1.astype(np.float32), yt1.astype(np.float32),
+                              interpolation=cv2.INTER_LINEAR) +
+                (1 - t) * cv2.remap(next_frame[..., c], xt2.astype(np.float32), yt2.astype(np.float32),
+                                    interpolation=cv2.INTER_LINEAR)
+        )
+
+    interpolated_frame = np.clip(interpolated_frame, 0, 255).astype(np.uint8)
     return interpolated_frame
-
