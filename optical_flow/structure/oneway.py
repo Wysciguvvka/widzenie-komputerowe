@@ -28,9 +28,9 @@ def func(optical_flow_func: Callable,
         if not callable(optical_flow_func):
             raise ValueError("Podana funkcja nie jest wywoływalna.")
 
-        if not isinstance(input_data, (str, list)) or \
-                (isinstance(input_data, list) and not all(isinstance(frame, np.ndarray) for frame in input_data)):
-            raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć.")
+        # if not isinstance(input_data, (str, list)) or \
+        #         (isinstance(input_data, list) and not all(isinstance(frame, np.ndarray) for frame in input_data)):
+        #     raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć.")
 
         return optical_flow_func(input_data, params, debug)
 
