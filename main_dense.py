@@ -66,17 +66,20 @@ def process_video(input_data: Union[str, List[np.ndarray]],
         #     of_data: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
         #                                                                   flow_params)
         # prev_frames, next_frames, next_pts, optical_flow_frames = of_data
+        frames_real = frames[1::2]
         frames = frames[0::2]
+        # frames = frames[0::2]
         h, w, _ = frames[0].shape
         debug_video: np.ndarray = np.zeros((h, w * 2, 3), dtype=np.uint8)
         interpolated_frames = []
         for i in range(1, len(frames)):
-            prev_frame = frames[i-1]
+            prev_frame = frames[i - 1]
             next_frame = frames[i]
             # flow, of_img = structure_func(optical_flow_func, prev_frame, next_frame)
             fw_flow, fw_of_img = dense.gunnar_farneback(prev_frame, next_frame)
             # bw_flow, bw_of_img = dense.gunnar_farneback(next_frame, prev_frame)
-            debug_video[:, :w, :] = fw_of_img
+            # debug_video[:, :w, :] = fw_of_img
+            debug_video[:, :w, :] = frames_real[i - 1]
             ip_frame = interpolation_func(prev_frame, next_frame, fw_flow)
             debug_video[:, w:, :] = ip_frame
             interpolated_frames.append(ip_frame)
@@ -114,4 +117,4 @@ if __name__ == "__main__":
     process_video("video/slow_traffic_small.mp4",
                   dense.gunnar_farneback,
                   structure.onewaystructure,
-                  interpolation.bicubic_farenback)
+                  interpolation.lanczos)

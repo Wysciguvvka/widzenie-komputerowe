@@ -29,9 +29,9 @@ def func(prev_frame, next_frame, optical_flow):
     for c in range(channels):
         interpolated_frame[..., c] = (
                 t * cv2.remap(prev_frame[..., c], xt1.astype(np.float32), yt1.astype(np.float32),
-                              interpolation=cv2.INTER_LINEAR) +
+                              interpolation=cv2.INTER_CUBIC) +
                 (1 - t) * cv2.remap(next_frame[..., c], xt2.astype(np.float32), yt2.astype(np.float32),
-                                    interpolation=cv2.INTER_LINEAR)
+                                    interpolation=cv2.INTER_CUBIC)
         )
 
     interpolated_frame = np.clip(interpolated_frame, 0, 255).astype(np.uint8)
