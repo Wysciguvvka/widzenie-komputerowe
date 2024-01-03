@@ -116,4 +116,4 @@ if __name__ == "__main__":
     process_video("video/slow_traffic_small.mp4",
                   algorithms.gunnar_farneback,
                   structure.onewaystructure,
-                  interpolation.bicubic_farenback)
+                  interpolation.spline)

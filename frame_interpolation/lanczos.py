@@ -2,8 +2,7 @@ import numpy as np
 import cv2
 
 
-def func(prev_frame, next_frame, optical_flow):
-    t = 0.5
+def func(prev_frame, next_frame, optical_flow, t=0.5):
     height, width, channels = prev_frame.shape
     flow_x, flow_y = optical_flow[:, :, 0], optical_flow[:, :, 1]
     x_grid, y_grid = np.meshgrid(np.arange(width), np.arange(height))
