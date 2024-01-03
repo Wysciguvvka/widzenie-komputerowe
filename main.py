@@ -3,14 +3,12 @@ import cv2
 import inspect
 import numpy as np
 import datetime
-import optical_flow.algorithms as algorithms
-import optical_flow.structure as structure
 import frame_interpolation as interpolation
+import optical_flow as flow
 
 
 def process_video(input_data: Union[str, List[np.ndarray]],
                   optical_flow_func: Callable,
-                  structure_func: Callable,
                   interpolation_func: Callable,
                   flow_params: Optional[Dict[str, float]] = None,
                   interpolation_params: Optional[Dict[str, float]] = None,
@@ -72,10 +70,10 @@ def process_video(input_data: Union[str, List[np.ndarray]],
         for i in range(1, len(frames)):
             prev_frame = frames[i - 1]
             next_frame = frames[i]
-            # flow, of_img = structure_func(optical_flow_func, prev_frame, next_frame)
-            # fw_flow, fw_of_img = structure_func(optical_flow_func, prev_frame, next_frame)
-            fw_flow, fw_of_img = algorithms.horn_schunck(prev_frame, next_frame)
-            # fw_flow, fw_of_img = algorithms.gunnar_farneback(prev_frame, next_frame)
+
+            # fw_flow, fw_of_img = flow.horn_schunck(prev_frame, next_frame)
+            # fw_flow, fw_of_img = flow.gunnar_farneback(prev_frame, next_frame)
+            fw_flow, fw_of_img = flow.pcaflow(prev_frame, next_frame)
             # debug_video[:, :w, :] = fw_of_img
             # debug_video[:, :w, :] = frames_real[i - 1]
             debug_video[:, :w, :] = fw_of_img
@@ -114,6 +112,5 @@ def is_parameter_present(function: Callable, parameter_name: str) -> bool:
 
 if __name__ == "__main__":
     process_video("video/slow_traffic_small.mp4",
-                  algorithms.gunnar_farneback,
-                  structure.onewaystructure,
-                  interpolation.spline)
+                  flow.gunnar_farneback,
+                  interpolation.bicubic)
