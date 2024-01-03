@@ -3,11 +3,8 @@ import cv2
 import inspect
 import numpy as np
 import datetime
-import os
-import optical_flow.algorithms.sparse as sparse
-import optical_flow.algorithms.dense as dense
+import optical_flow.algorithms as algorithms
 import optical_flow.structure as structure
-import optical_flow.models as models
 import frame_interpolation as interpolation
 
 
@@ -57,27 +54,42 @@ def process_video(input_data: Union[str, List[np.ndarray]],
         else:
             raise ValueError("Nieprawidłowe dane wejściowe. Oczekiwano ścieżki do filmu lub listy zdjęć")
 
-        frames_copy = [frame.copy() for frame in frames]
-        if is_parameter_present(structure_func, "levels"):
-            optical_flow_frames: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
-                                                                                      flow_params,
-                                                                                      levels=pyramid_levels)
-        else:
-            optical_flow_frames: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
-                                                                                      flow_params)
-
-        interpolated_frames: List[np.ndarray] = interpolation_func(frames_copy, optical_flow_frames, 2)
-
+        # frames_copy = [frame.copy() for frame in frames]
+        # if is_parameter_present(structure_func, "levels"):
+        #     of_data: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
+        #                                                                   flow_params,
+        #                                                                   levels=pyramid_levels)
+        # else:
+        #     of_data: Union[np.ndarray, List[np.ndarray]] = structure_func(optical_flow_func, frames_copy,
+        #                                                                   flow_params)
+        # prev_frames, next_frames, next_pts, optical_flow_frames = of_data
+        # frames = frames[0::2]
+        frames_real = frames[1::2]
+        frames = frames[0::2]
         h, w, _ = frames[0].shape
         debug_video: np.ndarray = np.zeros((h, w * 2, 3), dtype=np.uint8)
-        for i in range(len(frames)):
-            debug_video[:, :w, :] = frames[i]
-            debug_video[:, w:, :] = interpolated_frames[i]
-
+        interpolated_frames = []
+        for i in range(1, len(frames)):
+            prev_frame = frames[i - 1]
+            next_frame = frames[i]
+            # flow, of_img = structure_func(optical_flow_func, prev_frame, next_frame)
+            # fw_flow, fw_of_img = structure_func(optical_flow_func, prev_frame, next_frame)
+            fw_flow, fw_of_img = algorithms.horn_schunck(prev_frame, next_frame)
+            # fw_flow, fw_of_img = algorithms.gunnar_farneback(prev_frame, next_frame)
+            # debug_video[:, :w, :] = fw_of_img
+            # debug_video[:, :w, :] = frames_real[i - 1]
+            debug_video[:, :w, :] = fw_of_img
+            ip_frame = interpolation_func(prev_frame, next_frame, fw_flow)
+            debug_video[:, w:, :] = ip_frame
+            interpolated_frames.append(ip_frame)
             cv2.imshow('Debug Video', debug_video)
             if cv2.waitKey(30) & 0xFF == 27:  # ESC key to exit
                 break
-
+        z = 5
+        # cv2.imshow('next', frames[z+1])
+        # cv2.imshow('interp', interpolated_frames[z])
+        cv2.imwrite("frame.jpg", frames[z])
+        cv2.imwrite("ip.jpg", interpolated_frames[z])
         current_time = datetime.datetime.now()
         time_str = current_time.strftime("%H_%M_%S_%d_%m")
 
@@ -101,7 +113,7 @@ def is_parameter_present(function: Callable, parameter_name: str) -> bool:
 
 
 if __name__ == "__main__":
-    process_video("slow_traffic_small.mp4",
-                  sparse.lucas_kanade,
+    process_video("video/slow_traffic_small.mp4",
+                  algorithms.gunnar_farneback,
                   structure.onewaystructure,
-                  interpolation.bicubic)
+                  interpolation.bicubic_farenback)
