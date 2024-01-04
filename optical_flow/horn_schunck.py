@@ -49,3 +49,6 @@ def func(prev_frame, next_frame, alpha=1, num_iterations=10):
             cv2.arrowedLine(flow_img, (x, y), (int(x + dx), int(y + dy)), (0, 255, 0), 1, cv2.LINE_AA, tipLength=0.8)
 
     return optical_flow, flow_img
+
+
+func.__name__ = "Horn-Schunk"

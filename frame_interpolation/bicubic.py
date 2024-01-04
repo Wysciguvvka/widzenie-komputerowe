@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+
 def func(prev_frame, next_frame, optical_flow, t=0.5):
     height, width, channels = prev_frame.shape
     flow_x, flow_y = optical_flow[:, :, 0], optical_flow[:, :, 1]
@@ -28,3 +29,6 @@ def func(prev_frame, next_frame, optical_flow, t=0.5):
 
     interpolated_frame = np.clip(interpolated_frame, 0, 255).astype(np.uint8)
     return interpolated_frame
+
+
+func.__name__ = "Interpolacja kubiczna"
