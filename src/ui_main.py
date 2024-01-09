@@ -1,5 +1,5 @@
 import frame_interpolation
-from typing import List, Dict, Set, Callable, Tuple
+from typing import List, Dict, Callable, Tuple
 import optical_flow
 import numpy as np
 import logging
@@ -85,6 +85,20 @@ class GenerateFrames(QThread):
         flow_video, _, interpolated_video = process_video(self.frames, interpolation=interp_func,
                                                           interpolation_args=interp_params, optical_flow=flow_function,
                                                           optical_flows_args=flow_params)
+        # previous_num_frames = len(self.frames)
+        # new_num_frames = len(interpolated_video)
+        # total_num_frames = previous_num_frames + new_num_frames
+        # total_time_duration_previous = previous_num_frames / self.fps
+        # total_time_duration_new = previous_num_frames / self.fps
+        # total_time_duration = total_time_duration_previous + total_time_duration_new
+        # new_fps = total_num_frames / total_time_duration
+        height, width, _ = interpolated_video[0].shape
+        fourcc = cv2.VideoWriter.fourcc(*"mp4v")
+        out = cv2.VideoWriter(f"testowe.mp4", fourcc, self.fps*2, (width, height))
+        for frame in interpolated_video:
+            out.write(frame)
+        out.release()
+
         self.interpolated_video_signal.emit(interpolated_video, self.fps * 2)
         self.flow_video_signal.emit(flow_video, self.fps)
 
@@ -206,7 +220,6 @@ class VideoHandler(QWidget):
         self.setStyleSheet('border-color: rgba(152,152,152,255);')
 
         self.paint_video.connect(self.video_widget.paint_vid)
-
 
     def upload_button_function(self) -> None:
         """Image button"""
@@ -427,7 +440,8 @@ class SettingsWidget(QWidget):
         interpolation_functions = [frame_interpolation.average_frame, frame_interpolation.bicubic,
                                    frame_interpolation.spline, frame_interpolation.lanczos]
         interpolation_params = {'t': 0.5}
-        flow_functions = [optical_flow.gunnar_farneback, optical_flow.horn_schunck, optical_flow.phase_correlation]
+        flow_functions = [optical_flow.gunnar_farneback, optical_flow.horn_schunck, optical_flow.phase_correlation,
+                          optical_flow.test_flow]
         # flow_params = {'test': 666, 'jp2gmd': 2137}
         flow_params = {}
         self.interpolations_widget = InterFlowMenu(self, interpolation_functions, interpolation_params)

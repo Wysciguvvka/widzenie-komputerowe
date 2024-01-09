@@ -45,7 +45,7 @@ def func(prev_frame, next_frame, alpha=1, num_iterations=10):
     step_size = 20
     for y in range(0, h, step_size):
         for x in range(0, w, step_size):
-            dx, dy = optical_flow[y, x] * 5
+            dx, dy = optical_flow[y, x] * 7
             cv2.arrowedLine(flow_img, (x, y), (int(x + dx), int(y + dy)), (0, 255, 0), 1, cv2.LINE_AA, tipLength=0.8)
 
     return optical_flow, flow_img

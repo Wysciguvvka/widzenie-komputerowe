@@ -16,7 +16,7 @@ def func(prev_frame: np.ndarray, next_frame: np.ndarray, *, debug=False):
     step_size = 60
     for y in range(0, h, step_size):
         for x in range(0, w, step_size):
-            dx, dy = optical_flow[y, x]
+            dx, dy = optical_flow[y, x]*2.5
             cv2.arrowedLine(flow_img, (x, y), (int(x + dx), int(y + dy)), (0, 255, 0), 1, cv2.LINE_AA, tipLength=0.8)
     return optical_flow, flow_img
 
