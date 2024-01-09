@@ -2,14 +2,16 @@ import cv2
 import numpy as np
 
 
-def func(prev_frame: np.ndarray, next_frame: np.ndarray, *, debug=False):
+def func(prev_frame: np.ndarray, next_frame: np.ndarray, pyr_scale=0.5, levels=3, winsize=200,
+         iterations=4, poly_n=2, poly_sigma=1.1, flags=0, bx=5, by=5):
     prev_frame_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
     next_frame_gray = cv2.cvtColor(next_frame, cv2.COLOR_BGR2GRAY)
-    prev_frame_gray = cv2.GaussianBlur(prev_frame_gray, (5, 5), 0)
-    next_frame_gray = cv2.GaussianBlur(next_frame_gray, (5, 5), 0)
+    prev_frame_gray = cv2.GaussianBlur(prev_frame_gray, (bx, by), 0)
+    next_frame_gray = cv2.GaussianBlur(next_frame_gray, (bx, by), 0)
     optical_flow = cv2.calcOpticalFlowFarneback(prev_frame_gray, next_frame_gray, None,  # noqa
-                                                pyr_scale=0.5, levels=3, winsize=200,
-                                                iterations=4, poly_n=2, poly_sigma=1.1, flags=0)
+                                                pyr_scale=pyr_scale, levels=levels, winsize=winsize,
+                                                iterations=iterations, poly_n=poly_n, poly_sigma=poly_sigma,
+                                                flags=flags)
 
     flow_img = next_frame.copy()
     h, w = flow_img.shape[:2]

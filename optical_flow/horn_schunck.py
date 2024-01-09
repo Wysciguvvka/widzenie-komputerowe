@@ -3,12 +3,12 @@ from scipy.ndimage import convolve
 import cv2
 
 
-def func(prev_frame, next_frame, alpha=1, num_iterations=10):
+def func(prev_frame, next_frame, alpha=1, num_iterations=10, bx=5, by=5):
     prev_frame_grayscale = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
     next_frame_grayscale = cv2.cvtColor(next_frame, cv2.COLOR_BGR2GRAY)
 
-    prev_frame_grayscale = cv2.GaussianBlur(prev_frame_grayscale, (5, 5), 0)
-    next_frame_grayscale = cv2.GaussianBlur(next_frame_grayscale, (5, 5), 0)
+    prev_frame_grayscale = cv2.GaussianBlur(prev_frame_grayscale, (bx, by), 0)
+    next_frame_grayscale = cv2.GaussianBlur(next_frame_grayscale, (bx, by), 0)
 
     prev_frame_grayscale = prev_frame_grayscale.astype(np.float32) / 255.0
     next_frame_grayscale = next_frame_grayscale.astype(np.float32) / 255.0
@@ -51,4 +51,4 @@ def func(prev_frame, next_frame, alpha=1, num_iterations=10):
     return optical_flow, flow_img
 
 
-func.__name__ = "Horn-Schunk"
+func.__name__ = "Horn-Schunck"

@@ -72,8 +72,7 @@ def process_video(input_data: Union[str, List[np.ndarray]],
             next_frame = frames[i]
 
             # fw_flow, fw_of_img = flow.horn_schunck(prev_frame, next_frame)
-            # fw_flow, fw_of_img = flow.gunnar_farneback(prev_frame, next_frame)
-            fw_flow, fw_of_img = flow.pcaflow(prev_frame, next_frame)
+            fw_flow, fw_of_img = flow.gunnar_farneback(prev_frame, next_frame)
             # debug_video[:, :w, :] = fw_of_img
             # debug_video[:, :w, :] = frames_real[i - 1]
             debug_video[:, :w, :] = fw_of_img
@@ -86,8 +85,8 @@ def process_video(input_data: Union[str, List[np.ndarray]],
         z = 5
         # cv2.imshow('next', frames[z+1])
         # cv2.imshow('interp', interpolated_frames[z])
-        cv2.imwrite("frame.jpg", frames[z])
-        cv2.imwrite("ip.jpg", interpolated_frames[z])
+        # cv2.imwrite("frame.jpg", frames[z])
+        # cv2.imwrite("ip.jpg", interpolated_frames[z])
         current_time = datetime.datetime.now()
         time_str = current_time.strftime("%H_%M_%S_%d_%m")
 
