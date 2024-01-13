@@ -440,7 +440,7 @@ class SettingsWidget(QWidget):
         interpolation_functions = [frame_interpolation.average_frame, frame_interpolation.bicubic,
                                    frame_interpolation.spline, frame_interpolation.lanczos]
         interpolation_params = {'t': 0.5}
-        flow_functions = [optical_flow.gunnar_farneback, optical_flow.horn_schunck, optical_flow.phase_correlation,
+        flow_functions = [optical_flow.gunnar_farneback, optical_flow.horn_schunck,
                           optical_flow.test_flow]
         # flow_params = {'test': 666, 'jp2gmd': 2137}
         flow_params = {}

@@ -3,7 +3,7 @@ from scipy.ndimage import convolve
 import cv2
 
 
-def func(prev_frame, next_frame, alpha=1, num_iterations=10, bx=5, by=5):
+def func(prev_frame, next_frame, a=1, num_iterations=10, bx=5, by=5):
     prev_frame_grayscale = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
     next_frame_grayscale = cv2.cvtColor(next_frame, cv2.COLOR_BGR2GRAY)
 
@@ -19,22 +19,25 @@ def func(prev_frame, next_frame, alpha=1, num_iterations=10, bx=5, by=5):
     dx = convolve(prev_frame_grayscale, kernel_x) + convolve(next_frame_grayscale, kernel_x)
     dy = convolve(prev_frame_grayscale, kernel_y) + convolve(next_frame_grayscale, kernel_y)
     dt = next_frame_grayscale - prev_frame_grayscale
-    kernel_avg = np.array([[1 / 12, 1 / 6, 1 / 12],
-                           [1 / 6, 0, 1 / 6],
-                           [1 / 12, 1 / 6, 1 / 12]], float)
+
+    sigma = 1.0
+    x = np.arange(-1, 2, 1)
+    y = np.arange(-1, 2, 1)
+    xx, yy = np.meshgrid(x, y)
+    kernel_vel = np.exp(-(xx ** 2 + yy ** 2) / (2 * sigma ** 2))
+    kernel_vel /= np.sum(kernel_vel)
 
     u, v = np.zeros_like(prev_frame_grayscale), np.zeros_like(prev_frame_grayscale)
 
     for _ in range(num_iterations):
-        u_avg = convolve(u, kernel_avg)
-        v_avg = convolve(v, kernel_avg)
+        u_avg_vel = convolve(u, kernel_vel)
+        v_avg_vel = convolve(v, kernel_vel)
 
-        numerator = dx * u_avg + dy * v_avg + dt
-        denominator = alpha ** 2 + u_avg ** 2 + v_avg ** 2
-        u = u_avg - numerator / denominator
-        v = v_avg - numerator / denominator
+        spatiotemporal_gradient = dx * u_avg_vel + dy * v_avg_vel + dt
+        vel_norm = a ** 2 + u_avg_vel ** 2 + v_avg_vel ** 2
+        u = u_avg_vel - spatiotemporal_gradient / vel_norm
+        v = v_avg_vel - spatiotemporal_gradient / vel_norm
 
-        # tu dziala bez tego nwm co bedzie lepsze
         u = np.clip(u, -1, 1)
         v = np.clip(v, -1, 1)
 

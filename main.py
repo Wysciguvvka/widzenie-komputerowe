@@ -12,9 +12,8 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 class UI(QMainWindow):
     def __init__(self, *args, **kwargs) -> None:
         super(UI, self).__init__(*args, **kwargs)
-        self.setWindowTitle("Pisklak")
-        self.setWindowIcon(QIcon("./assets/images/icon3.png"))  # nie ma jeszcze ikonki
-        size = app.primaryScreen().size() * 0.6  # jakies skalowanie na ekranie
+        self.setWindowTitle("Aplikacja")
+        size = app.primaryScreen().size() * 0.6
         self.resize(size)
         self.setMinimumSize(800, 450)
         self.ui = UiMainWindow(self)
